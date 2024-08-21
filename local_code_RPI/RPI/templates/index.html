@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</head>
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <a class="navbar-brand" href="#">Sensor Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Help</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-user"></i> {{ current_user.username }}
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{ url_for('index') }}">Profile</a>
+                        <a class="dropdown-item" href="{{ url_for('index') }}">Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url_for('index') }}">Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container">
+        <header class="row my-4">
+	    <div class="col-sm-10 text-left">
+            <h1 class="text-left text-primary" id="welcomeHeader">Welcome, {{ current_user.username }}!</h1>
+	    </div>
+            <div class="col-sm-2 text-right">
+                <a href="{{ url_for('logout') }}" class="btn btn-danger text-right"><i class="fas fa-sign-out-alt">Logout</i></a>
+            </div>
+        </header>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="weather-card" id="temperatureCard">
+                    <div class="icon" id="temperatureIcon"><i class="fas fa-sun"></i></div>
+                    <h3>Temperature</h3>
+                    <p><strong>Temperature:</strong> <span id="currentTemperature">Loading...</span> °C</p>
+                    <canvas id="temperatureChart" class="weather-chart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="weather-card" id="humidityCard">
+                    <div class="icon" id="humidityIcon"><i class="fas fa-tint"></i></div>
+                    <h3>Humidity</h3>
+                    <p><strong>Humidity:</strong> <span id="currentHumidity">Loading...</span> %</p>
+                    <canvas id="humidityChart" class="weather-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+
+        <div class="value-display">
+            <p>Last Updated: <span id="lastUpdated">Loading...</span></p>
+        </div>
+
+
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+            <a class="navbar-brand">Previous Data</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link table-record" href="/fetch/5min" >Last 5 Minutes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link table-record" href="/fetch/30min" >Last 30 Minutes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link table-record" href="/fetch/1hour" >Last 1 Hour</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link table-record" href="/fetch/1day" >Last 1 Day</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link table-record" href="/fetch/1week" >Last 1 Week</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Sensor Data Table -->
+        <div id="dataTable" class="data-table-container">
+            <h2 class="mb-4 text-center">Displayed Data</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Humidity</th>
+                            <th>Temperature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if data %}
+                        {% for row in data['sensorData'] %}
+                        <tr>
+                            <td>{{ row['timestamp'] }}</td>
+                            <td>{{ row['humidity'] }}%</td>
+                            <td>{{ row['temperature'] }} °C</td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center">No data fetched.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <!-- New Footer -->
+    <footer class="bg-dark text-white py-4" style="margin-bottom:none;">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2024 Sensor Dashboard. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <a href="mailto:support@sensordashboard.com" class="text-white">Contact Support</a> |
+                    <a href="#" class="text-white">Privacy Policy</a> |
+                    <a href="#" class="text-white">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+</body>
+</html>
